@@ -1,0 +1,5 @@
+server:
+  port: 8081
+
+pizza-api:
+  url: http://localhost:8080/api/orders
