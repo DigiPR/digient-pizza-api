@@ -29,7 +29,7 @@ public class DefaultApiServiceImpl implements DefaultApi {
     private PizzaService pizzaService;
 
     public OrderResponse createOrders(OrderRequest orderrequest) {
-        Order order = pizzaService.createOrders(orderrequest.getPizza(), orderrequest.getCrust());
+        Order order = pizzaService.createOrderWithPizzaAndCrust(orderrequest.getPizza(), orderrequest.getCrust());
         OrderResponse orderResponse = new OrderResponse();
         orderResponse.setPizza(order.getPizza());
         orderResponse.setCrust(order.getCrust());
@@ -38,11 +38,11 @@ public class DefaultApiServiceImpl implements DefaultApi {
     }
 
     public void deleteOrder(String orderId) {
-        pizzaService.deleteOrder(orderId);
+        pizzaService.deleteOrderById(orderId);
     }
 
     public List<OrderResponse> findOrders(String pizza, String curst) {
-        List<Order> orders = pizzaService.findOrders(pizza, curst);
+        List<Order> orders = pizzaService.findOrdersByPizzaOrCurst(pizza, curst);
         List<OrderResponse> orderResponseList = new ArrayList<>();
         OrderResponse orderResponse = null;
         for (Order order : orders) {
@@ -56,7 +56,7 @@ public class DefaultApiServiceImpl implements DefaultApi {
     }
 
     public OrderResponse readOrder(String orderId) {
-        Order order = pizzaService.readOrder(orderId);
+        Order order = pizzaService.readOrderById(orderId);
         OrderResponse orderResponse = new OrderResponse();
         orderResponse.setPizza(order.getPizza());
         orderResponse.setCrust(order.getCrust());
@@ -65,7 +65,7 @@ public class DefaultApiServiceImpl implements DefaultApi {
     }
 
     public OrderResponse updateOrder(String orderId, OrderRequest orderrequest) {
-        Order order = pizzaService.updateOrder(orderId, orderrequest.getPizza(), orderrequest.getCrust());
+        Order order = pizzaService.updateOrderByIdWithPizzaAndCrust(orderId, orderrequest.getPizza(), orderrequest.getCrust());
         OrderResponse orderResponse = new OrderResponse();
         orderResponse.setPizza(order.getPizza());
         orderResponse.setCrust(order.getCrust());

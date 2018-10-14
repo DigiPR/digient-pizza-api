@@ -18,16 +18,16 @@ public class PizzaService {
     @Autowired
     private OrderRepository orderRepository;
 
-    public Order createOrders(String pizza, String curst) {
+    public Order createOrderWithPizzaAndCrust(String pizza, String curst) {
         Order order = new Order(pizza, curst);
         return orderRepository.save(order);
     }
 
-    public void deleteOrder(String orderId) {
+    public void deleteOrderById(String orderId) {
         orderRepository.deleteById(Long.parseLong(orderId));
     }
 
-    public List<Order> findOrders(String pizza, String curst) {
+    public List<Order> findOrdersByPizzaOrCurst(String pizza, String curst) {
         if((pizza != null && !"".equals(pizza)) && (curst != null && !"".equals(curst)))
             return orderRepository.findPizzaOrdersByPizzaAndCrust(pizza,curst);
         else if (pizza != null && !"".equals(pizza))
@@ -37,11 +37,11 @@ public class PizzaService {
         return orderRepository.findAll();
     }
 
-    public Order readOrder(String orderId) {
+    public Order readOrderById(String orderId) {
         return orderRepository.findById(Long.parseLong(orderId)).get();
     }
 
-    public Order updateOrder(String orderId, String pizza, String curst) {
+    public Order updateOrderByIdWithPizzaAndCrust(String orderId, String pizza, String curst) {
         Order order = new Order(pizza, curst);
         order.setOrderId(Long.parseLong(orderId));
         return orderRepository.save(order);

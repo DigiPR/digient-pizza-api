@@ -30,23 +30,23 @@ public class DefaultApiServiceImpl implements DefaultApi {
 
     @Override
     public OrderDTO createOrders(OrderDTO orderDTO) {
-        Order order = pizzaService.createOrders(orderDTO.getPizza(), orderDTO.getCrust());
+        Order order = pizzaService.createOrderWithPizzaAndCrust(orderDTO.getPizza(), orderDTO.getCrust());
         modelMapper.map(order, orderDTO);
         return orderDTO;
     }
 
     public void deleteOrder(String orderId) {
-        pizzaService.deleteOrder(orderId);
+        pizzaService.deleteOrderById(orderId);
     }
 
     public List<OrderDTO> findOrders(String pizza, String curst) {
-        List<Order> orders = pizzaService.findOrders(pizza, curst);
+        List<Order> orders = pizzaService.findOrdersByPizzaOrCurst(pizza, curst);
         Type orderTypeList = new TypeToken<List<OrderDTO>>() {}.getType();
         return modelMapper.map(orders, orderTypeList);
     }
 
     public OrderDTO readOrder(String orderId) {
-        Order order = pizzaService.readOrder(orderId);
+        Order order = pizzaService.readOrderById(orderId);
         OrderDTO orderDTO = new OrderDTO();
         modelMapper.map(order, orderDTO);
         return orderDTO;
@@ -54,7 +54,7 @@ public class DefaultApiServiceImpl implements DefaultApi {
 
     @Override
     public OrderDTO updateOrder(OrderDTO orderDTO) {
-        Order order = pizzaService.updateOrder(orderDTO.getOrderId(), orderDTO.getPizza(), orderDTO.getCrust());
+        Order order = pizzaService.updateOrderByIdWithPizzaAndCrust(orderDTO.getOrderId(), orderDTO.getPizza(), orderDTO.getCrust());
         modelMapper.map(order, orderDTO);
         return orderDTO;
     }
