@@ -1,12 +1,7 @@
 server:
-    port: 8080
+    port: 8081
 cxf:
     path: /api
     jaxrs:
         component-scan: true
         classes-scan-packages: org.apache.cxf.jaxrs.swagger
-spring:
-    datasource:
-        url: jdbc:h2:file:../data/database
-        username: sa
-        password: sa

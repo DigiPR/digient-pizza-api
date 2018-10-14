@@ -29,7 +29,7 @@ public class DefaultApiServiceImpl implements DefaultApi {
     private ModelMapper modelMapper;
 
     @Override
-    public OrderDTO createOrders(OrderDTO orderDTO) {
+    public OrderDTO createOrder(OrderDTO orderDTO) {
         Order order = pizzaService.createOrderWithPizzaAndCrust(orderDTO.getPizza(), orderDTO.getCrust());
         modelMapper.map(order, orderDTO);
         return orderDTO;

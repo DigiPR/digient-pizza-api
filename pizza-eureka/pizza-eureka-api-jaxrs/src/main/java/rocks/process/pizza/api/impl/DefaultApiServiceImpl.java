@@ -28,7 +28,7 @@ public class DefaultApiServiceImpl implements DefaultApi {
     @Autowired
     private PizzaService pizzaService;
 
-    public OrderResponse createOrders(OrderRequest orderrequest) {
+    public OrderResponse createOrder(OrderRequest orderrequest) {
         Order order = pizzaService.createOrderWithPizzaAndCrust(orderrequest.getPizza(), orderrequest.getCrust());
         OrderResponse orderResponse = new OrderResponse();
         orderResponse.setPizza(order.getPizza());

@@ -2,7 +2,7 @@ spring:
     application:
         name: pizza-api-client
 server:
-    port: 8081
+    port: 8080
 
 eureka:
     client:

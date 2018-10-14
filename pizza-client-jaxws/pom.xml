@@ -62,7 +62,7 @@
                             <sourceRoot>${project.build.directory}/generated/cxf</sourceRoot>
                             <wsdlOptions>
                                 <wsdlOption>
-                                    <wsdl>http://localhost:8080/api/orders?wsdl</wsdl>
+                                    <wsdl>http://localhost:8082/api/orders?wsdl</wsdl>
                                 </wsdlOption>
                             </wsdlOptions>
                         </configuration>

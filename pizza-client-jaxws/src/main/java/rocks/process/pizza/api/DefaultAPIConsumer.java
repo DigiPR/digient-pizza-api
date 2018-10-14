@@ -28,7 +28,7 @@ public class DefaultAPIConsumer {
         orderDTO.setPizza("SOAP");
         orderDTO.setCrust("lean");
 
-        orderDTO = defaultApi.createOrders(orderDTO);
+        orderDTO = defaultApi.createOrder(orderDTO);
         logger.info("Order created with orderId: " + orderDTO.getOrderId() + ".");
 
         List<OrderDTO> orders = defaultApi.findOrders("SOAP", "");

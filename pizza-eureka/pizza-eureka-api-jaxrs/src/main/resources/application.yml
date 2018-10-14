@@ -2,7 +2,7 @@ spring:
     application:
         name: pizza-api
 server:
-    port: 8080
+    port: 8083
 cxf:
     path: /api
     servlet.init:

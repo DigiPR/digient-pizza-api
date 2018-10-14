@@ -15,7 +15,7 @@ import java.util.List;
 public interface DefaultApi {
 
     @WebMethod
-    public OrderDTO createOrders(OrderDTO orderDTO);
+    public OrderDTO createOrder(OrderDTO orderDTO);
 
     @WebMethod
     public void deleteOrder(String orderId);

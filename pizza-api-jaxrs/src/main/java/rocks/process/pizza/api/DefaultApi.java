@@ -32,7 +32,7 @@ public interface DefaultApi {
     @ApiOperation(value = "", tags = {})
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = OrderResponse.class)})
-    public OrderResponse createOrders(@Valid OrderRequest orderrequest);
+    public OrderResponse createOrder(@Valid OrderRequest orderrequest);
 
     @DELETE
     @Path("/orders/{orderId}")
