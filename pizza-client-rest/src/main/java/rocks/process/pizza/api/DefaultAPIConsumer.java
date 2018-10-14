@@ -12,15 +12,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
-import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import rocks.process.pizza.model.OrderRequest;
 import rocks.process.pizza.model.OrderResponse;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 
-@Component
+@RestController
 public class DefaultAPIConsumer {
 
     private static Logger logger = LoggerFactory.getLogger(DefaultAPIConsumer.class);
@@ -31,25 +32,25 @@ public class DefaultAPIConsumer {
     @Autowired
     private RestTemplate restTemplate;
 
-    @PostConstruct
-    private void init()
+    @RequestMapping(value = "/test", method = RequestMethod.GET)
+    private void testPizzaOrder()
     {
         OrderRequest orderRequest = new OrderRequest("REST", "lean");
-        OrderResponse orderResponse = restTemplate.postForObject(pizzaAPIURL, new HttpEntity<>(orderRequest), OrderResponse.class);
+        OrderResponse orderResponse = restTemplate.postForObject(pizzaAPIURL + "/orders", new HttpEntity<>(orderRequest), OrderResponse.class);
         logger.info("Order created with orderId: " + orderResponse.getOrderId() + ".");
 
-        List<OrderResponse> orderResponses = restTemplate.exchange(pizzaAPIURL + "?pizza=REST", HttpMethod.GET, null, new ParameterizedTypeReference<List<OrderResponse>>(){}).getBody();
+        List<OrderResponse> orderResponses = restTemplate.exchange(pizzaAPIURL + "/orders" + "?pizza=REST", HttpMethod.GET, null, new ParameterizedTypeReference<List<OrderResponse>>(){}).getBody();
         logger.info("Order list received with size: " + orderResponses.size() + ".");
 
         orderRequest.setCrust("update");
-        restTemplate.put(pizzaAPIURL + "/" + orderResponse.getOrderId(), new HttpEntity<>(orderRequest));
+        restTemplate.put(pizzaAPIURL + "/orders/" + orderResponse.getOrderId(), new HttpEntity<>(orderRequest));
 
-        orderResponse = restTemplate.getForObject(pizzaAPIURL + "/" + orderResponse.getOrderId(), OrderResponse.class);
+        orderResponse = restTemplate.getForObject(pizzaAPIURL + "/orders/" + orderResponse.getOrderId(), OrderResponse.class);
         logger.info("Order updated and retrieved with crust: " + orderResponse.getCrust() + ".");
 
-        restTemplate.delete(pizzaAPIURL + "/" + orderResponse.getOrderId());
+        restTemplate.delete(pizzaAPIURL + "/orders/" + orderResponse.getOrderId());
 
-        orderResponses = restTemplate.exchange(pizzaAPIURL, HttpMethod.GET, null, new ParameterizedTypeReference<List<OrderResponse>>(){}).getBody();
+        orderResponses = restTemplate.exchange(pizzaAPIURL + "/orders", HttpMethod.GET, null, new ParameterizedTypeReference<List<OrderResponse>>(){}).getBody();
         logger.info("Order deleted and list received with size: " + orderResponses.size() + ".");
     }
 
