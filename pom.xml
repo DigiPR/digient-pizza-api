@@ -15,7 +15,9 @@
         <module>pizza-api-jaxws</module>
         <module>pizza-client-rest</module>
         <module>pizza-client-jaxws</module>
-        <module>pizza-eureka</module>
+        <module>pizza-eureka-registry</module>
+        <module>pizza-eureka-api-jaxrs</module>
+        <module>pizza-eureka-client-rest</module>
     </modules>
 
 </project>
