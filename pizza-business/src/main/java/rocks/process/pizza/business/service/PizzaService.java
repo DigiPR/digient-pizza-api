@@ -38,7 +38,7 @@ public class PizzaService {
     }
 
     public Order readOrderById(String orderId) {
-        return orderRepository.findById(Long.parseLong(orderId)).get();
+        return orderRepository.findById(Long.parseLong(orderId)).orElse(null);
     }
 
     public Order updateOrderByIdWithPizzaAndCrust(String orderId, String pizza, String curst) {

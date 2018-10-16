@@ -57,11 +57,14 @@ public class DefaultApiServiceImpl implements DefaultApi {
 
     public OrderResponse readOrder(String orderId) {
         Order order = pizzaService.readOrderById(orderId);
-        OrderResponse orderResponse = new OrderResponse();
-        orderResponse.setPizza(order.getPizza());
-        orderResponse.setCrust(order.getCrust());
-        orderResponse.setOrderId(order.getOrderId().toString());
-        return orderResponse;
+        if(order!=null) {
+            OrderResponse orderResponse = new OrderResponse();
+            orderResponse.setPizza(order.getPizza());
+            orderResponse.setCrust(order.getCrust());
+            orderResponse.setOrderId(order.getOrderId().toString());
+            return orderResponse;
+        }
+        return null;
     }
 
     public OrderResponse updateOrder(String orderId, OrderRequest orderrequest) {
