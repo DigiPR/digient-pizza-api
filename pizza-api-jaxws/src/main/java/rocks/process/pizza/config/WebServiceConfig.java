@@ -29,5 +29,4 @@ public class WebServiceConfig {
         endpoint.publish("/orders");
         return endpoint;
     }
-
 }

@@ -332,6 +332,7 @@ Once the REST API has been implemented as described above, the server can be boo
 - API URL: [http://localhost:8081/api](http://localhost:8081/api)
 - Swagger UI: [http://localhost:8081/api/api-docs?url=/api/swagger.json](http://localhost:8081/api/api-docs?url=/api/swagger.json)
 - Swagger JSON: [http://localhost:8081/api/swagger.json](http://localhost:8081/api/swagger.json)
+- WADL: [http://localhost:8080/api/?_wadl](http://localhost:8080/api/?_wadl)
 
 ### Spring RESTTemplate Client
 
@@ -437,27 +438,276 @@ Once the REST API client has been implemented as described above, the server can
 
 ### Interface Design
 
+![](images/pizza-api-jaxws.png)
+
 ### JAX-WS Endpoint
 
 #### Bootstrapping
 
-#### Implementation
+The project can be bootstrapped using the [Spring Initializr](https://start.spring.io) using the following group and artefact ids:
+
+```XML
+<groupId>rocks.process.pizza</groupId>
+<artifactId>pizza-api-jaxws</artifactId>
+```
+
+Use the [Spring Initializr](https://start.spring.io) and generate and import the project into your favourite IDE.
+
+Then modify the Maven `pom.xml` import the following dependencies:
+
+```XML
+<dependency>
+    <groupId>org.apache.cxf</groupId>
+    <artifactId>cxf-spring-boot-starter-jaxws</artifactId>
+    <version>3.2.5</version>
+</dependency>
+
+<dependency>
+    <groupId>org.modelmapper</groupId>
+    <artifactId>modelmapper</artifactId>
+    <version>2.3.0</version>
+</dependency>
+
+<dependency>
+    <groupId>rocks.process.pizza</groupId>
+    <artifactId>pizza-business</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+</dependency>
+```
+
+- `cxf-spring-boot-starter-jaxws` provides the Apache CXF JAX-WS support.
+- `modelmapper` enables an model-to-model mapping support.
+- `pizza-business` is the business layer.
 
 #### Configuration
 
+This SOA microservice will listen on port `8082` and register the jaxws / cxf components, as defined in the `application.yml`:
+
+```yaml
+server:
+  port: 8082
+cxf:
+  path: /api
+```
+
+```Java
+@Configuration
+public class WebServiceConfig {
+
+    @Autowired
+    private Bus bus;
+
+    @Autowired
+    private DefaultApiServiceImpl defaultApiService;
+
+    @Bean
+    public Endpoint endpoint() {
+        EndpointImpl endpoint = new EndpointImpl(bus, defaultApiService);
+        endpoint.publish("/orders");
+        return endpoint;
+    }
+}
+```
+
+```Java
+@Configuration
+public class ProvidersConfig {
+
+	@Bean
+	@ConditionalOnMissingBean
+	public ModelMapper modelMapper() {
+		return new ModelMapper();
+	}
+}
+```
+
+#### Implementation
+
+![](images/pizza-api-jaxws-impl.png)
+
+```Java
+@WebService
+public interface DefaultApi {
+
+    @WebMethod
+    public OrderDTO createOrder(OrderDTO orderDTO);
+
+    @WebMethod
+    public void deleteOrder(String orderId);
+
+    @WebMethod
+    public List<OrderDTO> findOrders(String pizza, String curst);
+
+    @WebMethod
+    public OrderDTO readOrder(String orderId);
+
+    @WebMethod
+    public OrderDTO updateOrder(OrderDTO orderDTO);
+}
+```
+
+```Java
+@Service
+@WebService(endpointInterface = "rocks.process.pizza.api.DefaultApi")
+public class DefaultApiServiceImpl implements DefaultApi {
+
+    @Autowired
+    private PizzaService pizzaService;
+
+    @Autowired
+    private ModelMapper modelMapper;
+
+    @Override
+    public OrderDTO createOrder(OrderDTO orderDTO) {
+        Order order = pizzaService.createOrderWithPizzaAndCrust(orderDTO.getPizza(), orderDTO.getCrust());
+        modelMapper.map(order, orderDTO);
+        return orderDTO;
+    }
+
+    public void deleteOrder(String orderId) {
+        pizzaService.deleteOrderById(orderId);
+    }
+
+    public List<OrderDTO> findOrders(String pizza, String curst) {
+        List<Order> orders = pizzaService.findOrdersByPizzaOrCurst(pizza, curst);
+        Type orderTypeList = new TypeToken<List<OrderDTO>>() {}.getType();
+        return modelMapper.map(orders, orderTypeList);
+    }
+
+    public OrderDTO readOrder(String orderId) {
+        Order order = pizzaService.readOrderById(orderId);
+        OrderDTO orderDTO = new OrderDTO();
+        modelMapper.map(order, orderDTO);
+        return orderDTO;
+    }
+
+    @Override
+    public OrderDTO updateOrder(OrderDTO orderDTO) {
+        Order order = pizzaService.updateOrderByIdWithPizzaAndCrust(orderDTO.getOrderId(), orderDTO.getPizza(), orderDTO.getCrust());
+        modelMapper.map(order, orderDTO);
+        return orderDTO;
+    }
+}
+```
+
 #### Deployment
+
+- Pizza-API WSDL: [http://localhost:8080/api/orders?wsdl](http://localhost:8080/api/orders?wsdl)
 
 ### CXF Web Service Client
 
 #### Bootstrapping
 
+The project can be bootstrapped using the [Spring Initializr](https://start.spring.io) using the following group and artefact ids:
+
+```XML
+<groupId>rocks.process.pizza</groupId>
+<artifactId>pizza-client-jaxws</artifactId>
+```
+
+Use the [Spring Initializr](https://start.spring.io) and generate and import the project into your favourite IDE.
+
+Then modify the Maven `pom.xml` import the following dependencies:
+
+```XML
+<dependency>
+    <groupId>org.apache.cxf</groupId>
+    <artifactId>cxf-spring-boot-starter-jaxws</artifactId>
+    <version>3.2.5</version>
+</dependency>
+
+<dependency>
+    <groupId>org.apache.cxf</groupId>
+    <artifactId>cxf-codegen-plugin</artifactId>
+    <version>3.2.5</version>
+</dependency>
+```
+
+- `cxf-spring-boot-starter-jaxws` provides the Apache CXF JAX-WS support.
+- `cxf-codegen-plugin` enables the client code generation.
+
 #### Configuration
 
-Maven
+```XML
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-codegen-plugin</artifactId>
+                <version>3.2.5</version>
+                <executions>
+                    <execution>
+                        <id>generate-sources</id>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <sourceRoot>${project.build.directory}/generated/cxf</sourceRoot>
+                            <wsdlOptions>
+                                <wsdlOption>
+                                    <wsdl>http://localhost:8082/api/orders?wsdl</wsdl>
+                                </wsdlOption>
+                            </wsdlOptions>
+                        </configuration>
+                        <goals>
+                            <goal>wsdl2java</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+```
 
-#### Generated Code
+```Java
+@Configuration
+public class WebServiceConfig {
 
-#### Implementation
+    @Bean
+    public DefaultApi defaultApi() {
+        return new DefaultApiServiceImplService().getDefaultApiServiceImplPort();
+    }
+}
+
+```
+
+#### Implementation and Deployment
+```Java
+@Component
+public class DefaultAPIConsumer {
+
+    private static Logger logger = LoggerFactory.getLogger(DefaultAPIConsumer.class);
+
+    @Autowired
+    private DefaultApi defaultApi;
+
+    @PostConstruct
+    private void init()
+    {
+        OrderDTO orderDTO = new OrderDTO();
+        orderDTO.setPizza("SOAP");
+        orderDTO.setCrust("lean");
+
+        orderDTO = defaultApi.createOrder(orderDTO);
+        logger.info("Order created with orderId: " + orderDTO.getOrderId() + ".");
+
+        List<OrderDTO> orders = defaultApi.findOrders("SOAP", "");
+        logger.info("Order list received with size: " + orders.size() + ".");
+
+        orderDTO.setCrust("update");
+        orderDTO = defaultApi.updateOrder(orderDTO);
+
+        orderDTO = defaultApi.readOrder(orderDTO.getOrderId());
+        logger.info("Order updated and retrieved with crust: " + orderDTO.getCrust() + ".");
+
+        defaultApi.deleteOrder(orderDTO.getOrderId());
+        orders = defaultApi.findOrders("","");
+        logger.info("Order deleted and list received with size: " + orders.size() + ".");
+    }
+}
+```
 
 ## 3. Service Registry
 
@@ -491,8 +741,8 @@ Maven
 
 
 
-- Pizza-API WSDL: [http://localhost:8080/api/orders?wsdl](http://localhost:8080/api/orders?wsdl)
-- Pizza-API WADL: [http://localhost:8080/api/?_wadl](http://localhost:8080/api/?_wadl)
+
+
 - Eureka Registry: [http://localhost:8761](http://localhost:8761)
 - Spring Actuator: /info
 - ModelMapper: [http://modelmapper.org](http://modelmapper.org)

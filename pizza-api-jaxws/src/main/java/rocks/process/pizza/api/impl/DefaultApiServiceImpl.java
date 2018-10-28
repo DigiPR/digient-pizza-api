@@ -58,6 +58,4 @@ public class DefaultApiServiceImpl implements DefaultApi {
         modelMapper.map(order, orderDTO);
         return orderDTO;
     }
-
 }
-

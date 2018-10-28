@@ -17,5 +17,4 @@ public class WebServiceConfig {
     public DefaultApi defaultApi() {
         return new DefaultApiServiceImplService().getDefaultApiServiceImplPort();
     }
-
 }

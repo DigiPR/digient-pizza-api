@@ -44,5 +44,4 @@ public class DefaultAPIConsumer {
         orders = defaultApi.findOrders("","");
         logger.info("Order deleted and list received with size: " + orders.size() + ".");
     }
-
 }
