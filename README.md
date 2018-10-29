@@ -20,7 +20,7 @@ This example illustrates how an API can be implemented based on JAX-RS and JAX-W
     - [JAX-WS Endpoint](#jax-ws-endpoint)
     - [CXF Web Service Client](#cxf-web-service-client)
 - [3. Service Registry](#3-service-registry)
-    - [Architecture](#architecture)
+    - [Architecture](#architecture-1)
     - [Eureka Server](#eureka-server)
     - [Self-registering JAX-RS Endpoint](#self-registering-jax-rs-endpoint)
     - [Spring RESTTemplate Client with Eureka](#spring-resttemplate-client-with-eureka)
@@ -436,11 +436,19 @@ Once the REST API client has been implemented as described above, the server can
 
 ## 2. SOAP Web Service
 
+The second implementation example is a JAX-WS-based SOAP Web Service (`pizza-api-jaxws`) and a corresponding client (`pizza-client-jaxws`).
+
 ### Interface Design
+
+With JAX-WS the interface can be designed in straight forward way by defining or using a plain Java interface, in this case `DefaultAPI`, and preferably some data transfer objects (DTOs), which is in this case called `OrderDTO`.
 
 ![](images/pizza-api-jaxws.png)
 
+> Please note that this example is reflecting a code-first approach.
+
 ### JAX-WS Endpoint
+
+In the following a pizza JAX-WS endpoint will be creating using [Spring Boot](https://projects.spring.io/spring-boot) and [Apache CXF](http://cxf.apache.org/) based on the [JAX-WS](https://javaee.github.io/metro-jax-ws/) (Java API for XML Web Services) specification.
 
 #### Bootstrapping
 
@@ -479,7 +487,7 @@ Then modify the Maven `pom.xml` import the following dependencies:
 - `modelmapper` enables an model-to-model mapping support.
 - `pizza-business` is the business layer.
 
-#### Configuration
+#### Initial-Configuration
 
 This SOA microservice will listen on port `8082` and register the jaxws / cxf components, as defined in the `application.yml`:
 
@@ -490,24 +498,9 @@ cxf:
   path: /api
 ```
 
-```Java
-@Configuration
-public class WebServiceConfig {
+If you have a layered enterprise architecture you end up with similar but different object models. Object mapping converts one model to another in a generic way. This is especially the case when having data transfer objects (DTOs) to avoid layer bridging.
 
-    @Autowired
-    private Bus bus;
-
-    @Autowired
-    private DefaultApiServiceImpl defaultApiService;
-
-    @Bean
-    public Endpoint endpoint() {
-        EndpointImpl endpoint = new EndpointImpl(bus, defaultApiService);
-        endpoint.publish("/orders");
-        return endpoint;
-    }
-}
-```
+In this example, we are using the [ModelMapper](http://modelmapper.org) library, which needs to be configured using `ProvidersConfig` in the package `rocks.process.pizza.config` as follows:
 
 ```Java
 @Configuration
@@ -523,7 +516,11 @@ public class ProvidersConfig {
 
 #### Implementation
 
+At the first stage create the `OrderDTO` class (including getter/setter) in the package `rocks.process.pizza.model` as depicted here:
+
 ![](images/pizza-api-jaxws-impl.png)
+
+Then define the `DefaultAPI` in package `rocks.process.pizza.api` as follows:
 
 ```Java
 @WebService
@@ -545,6 +542,13 @@ public interface DefaultApi {
     public OrderDTO updateOrder(OrderDTO orderDTO);
 }
 ```
+
+In this interface use the JAX-WS annotations for defining a SOAP Web Service:
+
+- With `@WebService` it is possible to define an interface to be a Endpoint and enable the WSDL generation.
+- With `@WebMethod` it is possible to include a method in the WSDL.
+
+Based on the `DefaultApi` SOAP Web Service definition above, an implementing class `DefaultApiServiceImpl` can be implemented in the package `rocks.process.pizza.api.impl` as follows in conjunction with the the [ModelMapper](http://modelmapper.org) library:
 
 ```Java
 @Service
@@ -590,11 +594,38 @@ public class DefaultApiServiceImpl implements DefaultApi {
 }
 ```
 
+#### Initial-Configuration
+
+The registration of the implementation classes can be done by injecting / registering them in a `WebServiceConfig` in the package `rocks.process.pizza.config` as follows:
+
+```Java
+@Configuration
+public class WebServiceConfig {
+
+    @Autowired
+    private Bus bus;
+
+    @Autowired
+    private DefaultApiServiceImpl defaultApiService;
+
+    @Bean
+    public Endpoint endpoint() {
+        EndpointImpl endpoint = new EndpointImpl(bus, defaultApiService);
+        endpoint.publish("/orders");
+        return endpoint;
+    }
+}
+```
+
 #### Deployment
 
-- Pizza-API WSDL: [http://localhost:8080/api/orders?wsdl](http://localhost:8080/api/orders?wsdl)
+Once the REST API has been implemented as described above, the server can be booted, investigated and tested using the following URL:
+
+- WSDL: [http://localhost:8080/api/orders?wsdl](http://localhost:8080/api/orders?wsdl)
 
 ### CXF Web Service Client
+
+To consume the SOAP web service, a SOAP client can be generated based on the WSDL and using the [Apache CXF code generation plugin](http://cxf.apache.org/docs/maven-cxf-codegen-plugin-wsdl-to-java.html).
 
 #### Bootstrapping
 
@@ -627,6 +658,8 @@ Then modify the Maven `pom.xml` import the following dependencies:
 - `cxf-codegen-plugin` enables the client code generation.
 
 #### Configuration
+
+To generate java artefacts from WSDL, CXF includes a Maven plugin which can configured as follows in the Apache Maven `pom.xml`:
 
 ```XML
     <build>
@@ -661,6 +694,10 @@ Then modify the Maven `pom.xml` import the following dependencies:
     </build>
 ```
 
+> Please note that the SOAP web service server must run.
+
+To make the SOAP web service client available, define `@Bean` in a `WebServiceConfig` (package `rocks.process.pizza.config`) as follows:
+
 ```Java
 @Configuration
 public class WebServiceConfig {
@@ -673,7 +710,10 @@ public class WebServiceConfig {
 
 ```
 
-#### Implementation and Deployment
+#### Implementation
+
+Once the client has been generated based on the WSDL, the SOAP web service can be consumed as any other interface as shown in the `DefaultAPIConsumer` exemplary component in the package `rocks.process.pizza.api;`:
+
 ```Java
 @Component
 public class DefaultAPIConsumer {
@@ -708,6 +748,10 @@ public class DefaultAPIConsumer {
     }
 }
 ```
+
+#### Deployment
+
+Once the SOAP web service client has been implemented as described above, the server can be booted and the logs can be investigated.
 
 ## 3. Service Registry
 
