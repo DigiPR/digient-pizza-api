@@ -15,16 +15,16 @@ This example illustrates how an API can be implemented based on JAX-RS and JAX-W
     - [Model-first OpenAPI / Swagger](#model-first-openapi--swagger)
     - [JAX-RS Endpoint](#jax-rs-endpoint)
     - [Spring RESTTemplate Client](#spring-resttemplate-client)
-- [2. SOAP Web Service](#2-soap-web-service)
-    - [Interface Design](#interface-design)
-    - [JAX-WS Endpoint](#jax-ws-endpoint)
-    - [CXF Web Service Client](#cxf-web-service-client)
-- [3. Service Registry](#3-service-registry)
+- [2. Service Registry](#2-service-registry)
     - [Architecture](#architecture-1)
     - [Eureka Server](#eureka-server)
     - [Self-registering JAX-RS Endpoint](#self-registering-jax-rs-endpoint)
     - [Spring RESTTemplate Client with Eureka](#spring-resttemplate-client-with-eureka)
-    - [Links:](#links)
+- [3. Camel and Eureka](#3-camel-and-eureka)
+- [4. SOAP Web Service](#4-soap-web-service)
+    - [Interface Design](#interface-design)
+    - [JAX-WS Endpoint](#jax-ws-endpoint)
+    - [CXF Web Service Client](#cxf-web-service-client)
 
 ## Analysis
 
@@ -434,9 +434,207 @@ Once the REST API client has been implemented as described above, the server can
 
 > Consult the server console / logs to investigate the logging information concerning the API client.
 
-## 2. SOAP Web Service
+## 2. Service Registry
 
-The second implementation example is a JAX-WS-based SOAP Web Service (`pizza-api-jaxws`) and a corresponding client (`pizza-client-jaxws`).
+The second implementation example is showcasing the [NETFLIX Eureka](https://github.com/Netflix/eureka/wiki/Eureka-at-a-glance) service registry (`pizza-eureka-registry`), a corresponding JAX-RS API (`pizza-eureka-client-jaxrs`) and a client (`pizza-eureka-client-rest`).
+
+### Architecture
+
+Besides the [NETFLIX Eureka](https://github.com/Netflix/eureka/wiki/Eureka-at-a-glance) service registry, the example is almost congruent with example one the [REST API](#1-rest-api) above. The example is using [Spring Boot Actuator](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready), which brings production-ready features to our application such as monitoring of the application, traffic or database. The [NETFLIX Eureka](https://github.com/Netflix/eureka/wiki/Eureka-at-a-glance) setting is defined as follows:
+
+![](images/pizza-eureka.png)
+
+### Eureka Server
+
+The configuration of a Eureka service registry server is straightforward.
+
+#### Bootstrapping
+
+The project can be bootstrapped using the [Spring Initializr](https://start.spring.io) using the following group and artefact ids:
+
+```XML
+<groupId>rocks.process.pizza</groupId>
+<artifactId>pizza-eureka-registry</artifactId>
+```
+
+Use the [Spring Initializr](https://start.spring.io) select `Eureka Server` and `Actuator` support, and generate and import the project into your favourite IDE.
+
+The Maven `pom.xml` will contain the following dependencies:
+
+```XML
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+</dependency>
+```
+
+#### Configuration
+
+The Eureka service registry server can be configured as follows:
+
+```yml
+server:
+  port: ${PORT:8761}
+eureka:
+  client:
+    registerWithEureka: false
+    fetchRegistry: false
+  server:
+    waitTimeInMsWhenSyncEmpty: 0
+spring:
+  application:
+    name: pizza-eureka-registry
+```
+
+And finally it can be enabled with the `@EnableEurekaServer` annotation:
+
+```Java
+@SpringBootApplication
+@EnableEurekaServer
+public class PizzaEurekaRegistryApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(PizzaEurekaRegistryApplication.class, args);
+    }
+}
+```
+
+#### Deployment
+
+Once the Eureka service registry server has been implemented as described above, the server can be booted, investigated and tested using the following URL:
+- Eureka Registry: [http://localhost:8761](http://localhost:8761)
+- Spring Actuator: [http://localhost:8761/info](http://localhost:8761/info)
+
+### Self-registering JAX-RS Endpoint
+
+The configuration of a Eureka JAX-RS endpoint client is straightforward as well.
+
+#### Bootstrapping
+
+The project can be bootstrapped using the [Spring Initializr](https://start.spring.io) using the following group and artefact ids:
+
+```XML
+<groupId>rocks.process.pizza</groupId>
+<artifactId>pizza-eureka-api-jaxrs</artifactId>
+```
+
+Use the [Spring Initializr](https://start.spring.io) select `Eureka Client` and `Actuator` support, and generate and import the project into your favourite IDE.
+
+The Maven `pom.xml` will contain the following dependencies:
+
+```XML
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+</dependency>
+```
+
+> Please note that you may have to add further dependencies depending on you JAX-RS provider - see [JAX-RS Endpoint](#jax-rs-endpoint).
+
+#### Configuration
+
+The Eureka JAX-RS endpoint client can be configured as follows:
+
+```yml
+spring:
+    application:
+        name: pizza-api
+server:
+    port: 8083
+eureka:
+    client:
+        serviceUrl:
+            defaultZone: ${EUREKA_SERVER_URI:http://localhost}:${EUREKA_SERVER_PORT:8761}/eureka/
+    instance:
+        leaseRenewalIntervalInSeconds: 1
+        leaseExpirationDurationInSeconds: 2
+        prefer-ip-address: true
+        statusPageUrlPath: /api/info
+```
+
+And finally it can be enabled with the `@EnableEurekaServer` annotation:
+
+```Java
+@SpringBootApplication
+@EnableEurekaClient
+public class PizzaEurekaApiJaxrsApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(PizzaEurekaApiJaxrsApplication.class, args);
+    }
+}
+```
+
+#### Deployment
+
+Once the Eureka JAX-RS endpoint client has been implemented as described above, the client can be booted and the registration can be investigated using the following URL:
+- Eureka Registry: [http://localhost:8761](http://localhost:8761)
+- Spring Actuator: [http://localhost:8083/api/info](http://localhost:8083/api/info)
+
+### Spring RESTTemplate Client with Eureka
+
+#### Bootstrapping
+
+#### Configuration
+
+```yml
+spring:
+    application:
+        name: pizza-api-client
+server:
+    port: 8080
+eureka:
+    client:
+        serviceUrl:
+            defaultZone: ${EUREKA_SERVER_URI:http://localhost}:${EUREKA_SERVER_PORT:8761}/eureka/
+    instance:
+        leaseRenewalIntervalInSeconds: 1
+        leaseExpirationDurationInSeconds: 2
+        prefer-ip-address: true
+```
+
+```Java
+@SpringBootApplication
+@EnableEurekaClient
+public class PizzaEurekaClientRestApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(PizzaEurekaClientRestApplication.class, args);
+    }
+}
+```
+
+```Java
+@Configuration
+public class WebServiceConfig {
+
+    @Bean
+    @LoadBalanced
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+
+}
+```
+
+#### Implementation
+
+## 3. Camel and Eureka
+
+
+## 4. SOAP Web Service
+
+The fourth implementation example is a JAX-WS-based SOAP Web Service (`pizza-api-jaxws`) and a corresponding client (`pizza-client-jaxws`).
 
 ### Interface Design
 
@@ -459,7 +657,7 @@ The project can be bootstrapped using the [Spring Initializr](https://start.spri
 <artifactId>pizza-api-jaxws</artifactId>
 ```
 
-Use the [Spring Initializr](https://start.spring.io) and generate and import the project into your favourite IDE.
+Use the [Spring Initializr](https://start.spring.io), and generate and import the project into your favourite IDE.
 
 Then modify the Maven `pom.xml` import the following dependencies:
 
@@ -636,7 +834,7 @@ The project can be bootstrapped using the [Spring Initializr](https://start.spri
 <artifactId>pizza-client-jaxws</artifactId>
 ```
 
-Use the [Spring Initializr](https://start.spring.io) and generate and import the project into your favourite IDE.
+Use the [Spring Initializr](https://start.spring.io), and generate and import the project into your favourite IDE.
 
 Then modify the Maven `pom.xml` import the following dependencies:
 
@@ -752,41 +950,3 @@ public class DefaultAPIConsumer {
 #### Deployment
 
 Once the SOAP web service client has been implemented as described above, the server can be booted and the logs can be investigated.
-
-## 3. Service Registry
-
-### Architecture
-
-### Eureka Server
-
-#### Bootstrapping
-
-#### Configuration
-
-#### Deployment
-
-### Self-registering JAX-RS Endpoint
-
-#### Bootstrapping
-
-#### Configuration
-
-#### Deployment
-
-### Spring RESTTemplate Client with Eureka
-
-#### Bootstrapping
-
-#### Configuration
-
-#### Implementation
-
-### Links:
-
-
-
-
-
-- Eureka Registry: [http://localhost:8761](http://localhost:8761)
-- Spring Actuator: /info
-- ModelMapper: [http://modelmapper.org](http://modelmapper.org)
