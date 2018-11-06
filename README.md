@@ -20,8 +20,7 @@ This example illustrates how an API can be implemented based on JAX-RS and JAX-W
     - [Eureka Server](#eureka-server)
     - [Self-registering JAX-RS Endpoint](#self-registering-jax-rs-endpoint)
     - [Spring RESTTemplate Client with Eureka](#spring-resttemplate-client-with-eureka)
-- [3. Camel and Eureka](#3-camel-and-eureka)
-- [4. SOAP Web Service](#4-soap-web-service)
+- [3. SOAP Web Service](#3-soap-web-service)
     - [Interface Design](#interface-design)
     - [JAX-WS Endpoint](#jax-ws-endpoint)
     - [CXF Web Service Client](#cxf-web-service-client)
@@ -562,7 +561,7 @@ eureka:
         statusPageUrlPath: /api/info
 ```
 
-And finally it can be enabled with the `@EnableEurekaServer` annotation:
+And finally Eureka can be enabled with the `@EnableEurekaClient` annotation:
 
 ```Java
 @SpringBootApplication
@@ -583,9 +582,41 @@ Once the Eureka JAX-RS endpoint client has been implemented as described above, 
 
 ### Spring RESTTemplate Client with Eureka
 
+Finally, the configuration of the Spring RESTTemplate Client working with Eureka is straightforward as well.
+
 #### Bootstrapping
 
+The project can be bootstrapped using the [Spring Initializr](https://start.spring.io) using the following group and artefact ids:
+
+```XML
+<groupId>rocks.process.pizza</groupId>
+<artifactId>pizza-eureka-client-rest</artifactId>
+```
+
+Use the [Spring Initializr](https://start.spring.io) select `Spring Web` `Eureka Client` and `Actuator` support, and generate and import the project into your favourite IDE.
+
+The Maven `pom.xml` will contain the following dependencies:
+
+```XML
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+</dependency>
+```
+
 #### Configuration
+
+The Spring RESTTemplate Client working with Eureka can be configured as follows:
 
 ```yml
 spring:
@@ -603,6 +634,8 @@ eureka:
         prefer-ip-address: true
 ```
 
+Next, Eureka can be enabled with the `@EnableEurekaClient` annotation:
+
 ```Java
 @SpringBootApplication
 @EnableEurekaClient
@@ -613,6 +646,8 @@ public class PizzaEurekaClientRestApplication {
     }
 }
 ```
+
+And finally Eureka load balancer can be used with the `@LoadBalanced` annotation while creating the `RestTemplate` bean:
 
 ```Java
 @Configuration
@@ -629,12 +664,39 @@ public class WebServiceConfig {
 
 #### Implementation
 
-## 3. Camel and Eureka
+The following `DefaultAPIConsumer` class showcases how the Eureka-based JAX-RS client can be retrieved by using an URL placeholder e.g. `http://PIZZA-API`:
 
+```Java
+@RestController
+public class DefaultAPIConsumer {
 
-## 4. SOAP Web Service
+    private static Logger logger = LoggerFactory.getLogger(DefaultAPIConsumer.class);
 
-The fourth implementation example is a JAX-WS-based SOAP Web Service (`pizza-api-jaxws`) and a corresponding client (`pizza-client-jaxws`).
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @RequestMapping(value = "/test", method = RequestMethod.GET)
+    private void testPizzaOrder()
+    {
+        OrderRequest orderRequest = new OrderRequest("EUREKA-REST", "lean");
+        OrderResponse orderResponse = restTemplate.postForObject("http://PIZZA-API/api/orders", new HttpEntity<>(orderRequest), OrderResponse.class);
+        logger.info("Order created with orderId: " + orderResponse.getOrderId() + ".");
+        // ...
+    }
+}
+```
+
+#### Deployment
+
+Once the Eureka-based JAX-RS client has been implemented as described above, the server can be booted, investigated and tested using the following URL:
+
+- The Eureka-based JAX-RS client test URL: [http://localhost:8080/test](http://localhost:8080/test)
+
+> Consult the server console / logs to investigate the logging information concerning the API client.
+
+## 3. SOAP Web Service
+
+The third implementation example is a JAX-WS-based SOAP Web Service (`pizza-api-jaxws`) and a corresponding client (`pizza-client-jaxws`).
 
 ### Interface Design
 
