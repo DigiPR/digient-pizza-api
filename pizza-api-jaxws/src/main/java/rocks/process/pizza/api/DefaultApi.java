@@ -21,7 +21,7 @@ public interface DefaultApi {
     public void deleteOrder(String orderId);
 
     @WebMethod
-    public List<OrderDTO> findOrders(String pizza, String curst);
+    public List<OrderDTO> findOrders(String pizza, String crust);
 
     @WebMethod
     public OrderDTO readOrder(String orderId);

@@ -41,8 +41,8 @@ public class DefaultApiServiceImpl implements DefaultApi {
         pizzaService.deleteOrderById(orderId);
     }
 
-    public List<OrderResponse> findOrders(String pizza, String curst) {
-        List<Order> orders = pizzaService.findOrdersByPizzaOrCurst(pizza, curst);
+    public List<OrderResponse> findOrders(String pizza, String crust) {
+        List<Order> orders = pizzaService.findOrdersByPizzaOrcrust(pizza, crust);
         List<OrderResponse> orderResponseList = new ArrayList<>();
         OrderResponse orderResponse = null;
         for (Order order : orders) {

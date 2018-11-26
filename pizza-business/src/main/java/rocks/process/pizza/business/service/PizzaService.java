@@ -18,8 +18,8 @@ public class PizzaService {
     @Autowired
     private OrderRepository orderRepository;
 
-    public Order createOrderWithPizzaAndCrust(String pizza, String curst) {
-        Order order = new Order(pizza, curst);
+    public Order createOrderWithPizzaAndCrust(String pizza, String crust) {
+        Order order = new Order(pizza, crust);
         return orderRepository.save(order);
     }
 
@@ -27,13 +27,13 @@ public class PizzaService {
         orderRepository.deleteById(Long.parseLong(orderId));
     }
 
-    public List<Order> findOrdersByPizzaOrCurst(String pizza, String curst) {
-        if((pizza != null && !"".equals(pizza)) && (curst != null && !"".equals(curst)))
-            return orderRepository.findPizzaOrdersByPizzaAndCrust(pizza,curst);
+    public List<Order> findOrdersByPizzaOrcrust(String pizza, String crust) {
+        if((pizza != null && !"".equals(pizza)) && (crust != null && !"".equals(crust)))
+            return orderRepository.findPizzaOrdersByPizzaAndCrust(pizza,crust);
         else if (pizza != null && !"".equals(pizza))
             return orderRepository.findPizzaOrdersByPizza(pizza);
-        else if (curst != null && !"".equals(curst))
-            return orderRepository.findPizzaOrdersByCrust(curst);
+        else if (crust != null && !"".equals(crust))
+            return orderRepository.findPizzaOrdersByCrust(crust);
         return orderRepository.findAll();
     }
 
@@ -41,8 +41,8 @@ public class PizzaService {
         return orderRepository.findById(Long.parseLong(orderId)).orElse(null);
     }
 
-    public Order updateOrderByIdWithPizzaAndCrust(String orderId, String pizza, String curst) {
-        Order order = new Order(pizza, curst);
+    public Order updateOrderByIdWithPizzaAndCrust(String orderId, String pizza, String crust) {
+        Order order = new Order(pizza, crust);
         order.setOrderId(Long.parseLong(orderId));
         return orderRepository.save(order);
     }

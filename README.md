@@ -269,7 +269,7 @@ public interface DefaultApi {
     @GET
     @Path("/orders")
     @Produces({"application/json"})
-    public List<OrderResponse> findOrders(@QueryParam("pizza") String pizza, @QueryParam("curst") String curst);
+    public List<OrderResponse> findOrders(@QueryParam("pizza") String pizza, @QueryParam("crust") String crust);
 
     @GET
     @Path("/orders/{orderId}")
@@ -308,7 +308,7 @@ public class DefaultApiServiceImpl implements DefaultApi {
         // ...
     }
 
-    public List<OrderResponse> findOrders(String pizza, String curst) {
+    public List<OrderResponse> findOrders(String pizza, String crust) {
         // ...
     }
 
@@ -793,7 +793,7 @@ public interface DefaultApi {
     public void deleteOrder(String orderId);
 
     @WebMethod
-    public List<OrderDTO> findOrders(String pizza, String curst);
+    public List<OrderDTO> findOrders(String pizza, String crust);
 
     @WebMethod
     public OrderDTO readOrder(String orderId);
@@ -832,8 +832,8 @@ public class DefaultApiServiceImpl implements DefaultApi {
         pizzaService.deleteOrderById(orderId);
     }
 
-    public List<OrderDTO> findOrders(String pizza, String curst) {
-        List<Order> orders = pizzaService.findOrdersByPizzaOrCurst(pizza, curst);
+    public List<OrderDTO> findOrders(String pizza, String crust) {
+        List<Order> orders = pizzaService.findOrdersByPizzaOrcrust(pizza, crust);
         Type orderTypeList = new TypeToken<List<OrderDTO>>() {}.getType();
         return modelMapper.map(orders, orderTypeList);
     }
@@ -881,7 +881,7 @@ public class WebServiceConfig {
 
 Once the REST API has been implemented as described above, the server can be booted, investigated and tested using the following URL:
 
-- WSDL: [http://localhost:8080/api/orders?wsdl](http://localhost:8080/api/orders?wsdl)
+- WSDL: [http://localhost:8082/api/orders?wsdl](http://localhost:8082/api/orders?wsdl)
 
 ### CXF Web Service Client
 

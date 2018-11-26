@@ -39,8 +39,8 @@ public class DefaultApiServiceImpl implements DefaultApi {
         pizzaService.deleteOrderById(orderId);
     }
 
-    public List<OrderDTO> findOrders(String pizza, String curst) {
-        List<Order> orders = pizzaService.findOrdersByPizzaOrCurst(pizza, curst);
+    public List<OrderDTO> findOrders(String pizza, String crust) {
+        List<Order> orders = pizzaService.findOrdersByPizzaOrcrust(pizza, crust);
         Type orderTypeList = new TypeToken<List<OrderDTO>>() {}.getType();
         return modelMapper.map(orders, orderTypeList);
     }

@@ -47,7 +47,7 @@ public interface DefaultApi {
     @ApiOperation(value = "", tags = {})
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = OrderResponse.class, responseContainer = "List")})
-    public List<OrderResponse> findOrders(@QueryParam("pizza") String pizza, @QueryParam("curst") String curst);
+    public List<OrderResponse> findOrders(@QueryParam("pizza") String pizza, @QueryParam("crust") String crust);
 
     @GET
     @Path("/orders/{orderId}")
