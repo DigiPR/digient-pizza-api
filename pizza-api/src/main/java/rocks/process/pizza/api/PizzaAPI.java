@@ -21,12 +21,6 @@ public class PizzaAPI {
     @Autowired
     private MenuRepositoryDB menuRepositoryDB;
 
-    @PostMapping(path = "/pizza", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<Void> postPizza(@RequestParam(value = "tenantId", required = false, defaultValue = "") String tenantId, @RequestBody Pizza pizza) {
-        menuRepositoryDB.setMenuItem(tenantId, pizza.getPizzaName());
-        return ResponseEntity.ok().build();
-    }
-
     @GetMapping(path = "/pizza", produces = "application/json")
     public ResponseEntity<Menu> getPizza(@RequestParam(value = "tenantId", required = false, defaultValue = "") String tenantId) {
         return ResponseEntity.ok(new Menu(menuRepositoryDB.getMenuItemsDB(tenantId)));
@@ -35,6 +29,18 @@ public class PizzaAPI {
     @GetMapping(path = "/surprise", produces = "application/json")
     public ResponseEntity<Menu> getSurpriseMenu() {
         return ResponseEntity.ok(new Menu(getRandomMenuItem()));
+    }
+
+    @PostMapping(path = "/pizza", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<Void> postPizza(@RequestParam(value = "tenantId", required = false, defaultValue = "") String tenantId, @RequestBody Pizza pizza) {
+        menuRepositoryDB.setMenuItem(tenantId, pizza.getPizzaName());
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping(path = "/pizza")
+    public ResponseEntity<Void> flushPizza(@RequestParam(value = "tenantId", required = false, defaultValue = "") String tenantId) {
+        menuRepositoryDB.flushMenuItems(tenantId);
+        return ResponseEntity.ok().build();
     }
 
     static class Pizza {

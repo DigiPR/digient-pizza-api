@@ -30,4 +30,11 @@ public class MenuRepositoryDB {
             menuItemsDB.get(id).add(menuItem);
     }
 
+    public void flushMenuItems(String id) {
+        id = Objects.toString(id, "");
+        if(menuItemsDB.containsKey(id)){
+            menuItemsDB.get(id).clear();
+        }
+    }
+
 }
