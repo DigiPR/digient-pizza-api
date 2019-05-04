@@ -18,7 +18,7 @@ public class MenuRepositoryDB {
         if(menuItemsDB.containsKey(id)){
             return String.join(", ", menuItemsDB.get(id));
         }
-        return null;
+        return "";
     }
 
     public void setMenuItem(String id, String menuItem) {
