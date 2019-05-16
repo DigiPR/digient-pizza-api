@@ -10,10 +10,10 @@ import org.springframework.stereotype.Repository;
 import java.util.*;
 
 @Repository
-public class MenuRepositoryDB {
+public class MenuRepository {
     private Map<String, List<String>> menuItemsDB = new HashMap<>();
 
-    public String getMenuItemsDB(String id) {
+    public String getMenuItems(String id) {
         id = Objects.toString(id, "");
         if(menuItemsDB.containsKey(id)){
             return String.join(", ", menuItemsDB.get(id));

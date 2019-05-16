@@ -8,7 +8,7 @@ package rocks.process.pizza.api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import rocks.process.pizza.data.MenuRepositoryDB;
+import rocks.process.pizza.data.MenuRepository;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,11 +19,11 @@ import java.util.Random;
 public class PizzaAPI {
 
     @Autowired
-    private MenuRepositoryDB menuRepositoryDB;
+    private MenuRepository menuRepository;
 
     @GetMapping(path = "/pizza", produces = "application/json")
     public ResponseEntity<Menu> getPizza(@RequestParam(value = "tenantId", required = false, defaultValue = "") String tenantId) {
-        return ResponseEntity.ok(new Menu(menuRepositoryDB.getMenuItemsDB(tenantId)));
+        return ResponseEntity.ok(new Menu(menuRepository.getMenuItems(tenantId)));
     }
 
     @GetMapping(path = "/surprise", produces = "application/json")
@@ -33,13 +33,13 @@ public class PizzaAPI {
 
     @PostMapping(path = "/pizza", consumes = "application/json", produces = "application/json")
     public ResponseEntity<Void> postPizza(@RequestParam(value = "tenantId", required = false, defaultValue = "") String tenantId, @RequestBody Pizza pizza) {
-        menuRepositoryDB.setMenuItem(tenantId, pizza.getPizzaName());
+        menuRepository.setMenuItem(tenantId, pizza.getPizzaName());
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping(path = "/pizza")
     public ResponseEntity<Void> flushPizza(@RequestParam(value = "tenantId", required = false, defaultValue = "") String tenantId) {
-        menuRepositoryDB.flushMenuItems(tenantId);
+        menuRepository.flushMenuItems(tenantId);
         return ResponseEntity.ok().build();
     }
 
