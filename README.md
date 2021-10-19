@@ -1,5 +1,7 @@
 # DigiPR Pizza API Example
 
+> ❗❗ **This repository has been archived**.
+
 This example illustrates how an API can be implemented based on JAX-RS and JAX-WS with the help of Apache CXF, the Spring framework, Netflix Eureka and Swagger/OpenAPI.
 
 #### Contents:
